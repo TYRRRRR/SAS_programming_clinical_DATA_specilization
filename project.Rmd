@@ -1,0 +1,38 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(tidyverse)
+```
+
+### Read in the Data
+
+```{r}
+###Read in the clinical trial data and print the head of the data
+df <- read.table("C:/Users/tong2/Desktop/DBS.txt",header = TRUE)
+
+###Derive a new col called diff
+df$diff <- df$DBP5-df$DBP1
+
+###Print the head of the df
+head(df)
+```
+### Perform T-Test on diff
+```{r}
+### assumption of equal var should be tested
+var.test(diff ~ TRT, df)
+### peform t test
+t.test(diff ~ TRT, df, var.equal=T)
+```
+```{r}
+### assumption of equal var should be tested
+var.test(diff ~ TRT, df)
+### peform t test
+t.test(diff ~ TRT, df, var.equal=T)
+```
