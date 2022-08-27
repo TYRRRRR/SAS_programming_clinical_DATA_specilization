@@ -47,7 +47,7 @@ bootMean = boot(df,calcDiff,R=1000)
 plot(bootMean)
 ```
 
-### One-way ANOVA for Time Changes
+### one Way ANOVA for Time Changes
 ```{r}
 anovaDF <- df[,2:7] %>%
   group_by(TRT) %>%
@@ -59,9 +59,51 @@ dfLong <- df %>% pivot_longer(cols = starts_with("DBP"),
                               names_to = "time",
                               names_prefix = "DBP",
                               values_to = "DBP") %>%
+  mutate(time = as.factor(time))%>%
   arrange(time,Subject)
 
+# One-way Anova for each group
+Adata <- dfLong %>% filter(TRT=='A')
+testA = aov(DBP~time,Adata)
+Bdata <- dfLong %>% filter(TRT=='B')
+testB = aov(DBP~time,Bdata)
+
+# prompts the result of one-way Anova
+summary(testA)
+summary(testB)
+
+# build Contrasts to investigate the times at which DBP means are S S
+TukeyHSD(testA)
+TukeyHSD(testB)
 
 ```
 
+### two Way ANOVA for Time Changes
+```{r}
+twoWay <- aov(DBP~TRT*time,dfLong)
+
+summary(twoWay)
+
+```
+### Display the interaction plot
+```{r}
+dfLong %>% select(TRT,time,DBP)%>%
+           mutate(time = as.numeric(time)) %>%
+           group_by(TRT,time) %>%
+           summarise(mean=mean(DBP)) %>% 
+  ggplot(aes(x=time,y=mean,col = TRT)) +
+  geom_line(size=1.5)+
+  theme_bw()
+
+
+dfLong %>% select(TRT,time,DBP)%>%
+           group_by(TRT,time) %>%
+           summarise(mean=mean(DBP)) %>% 
+  ggplot(aes(x=TRT,y=mean,col = time)) +
+  geom_point(size=1.5)+
+  theme_bw()
+
+TukeyHSD(aov(DBP ~ TRT*time,dfLong))
+
+```
 
