@@ -106,4 +106,40 @@ dfLong %>% select(TRT,time,DBP)%>%
 TukeyHSD(aov(DBP ~ TRT*time,dfLong))
 
 ```
+### Pearson's Chi^2 test
+```{r}
+#test the null hypo: equal probabilities of healing for 4 groups
+n = c(168, 182, 165,188)
+p4 = c(.41, .62, .73, .77)
+x4 = c(69, 113, 120, 145)
+#4 sample without continuity correction
+prop.test(x4, n)
+#4 sample with continuity correction
+prop.test(x4[c(1,3)], n[c(1,3)])
+prop.test(x4[c(2,3)], n[c(2,3)])
+prop.test(x4[c(3,4)], n[c(3,4)])
+```
+### Using Contingency Table 
+```{r}
+# create a dataframe for the Ulcer trial
+Ulcer = data.frame(
+# use ``factor" to create the treatment factor
+trt = factor(rep(c("0 mg C","400 mg C","800 mg C","1600 mg C"),
+each=2),levels=c("0 mg C","400 mg C","800 mg C","1600 mg C") ),
+Heal = c("Yes","No","Yes","No","Yes","No","Yes","No"),
+y = c(x4[1],n[1]-x4[1],x4[2],n[2]-x4[2],x4[3],
+n[3]-x4[3],x4[4],n[4]-x4[4]))
+
+contDF <- xtabs(y~trt+Heal,Ulcer)
+contDF
+
+# layout for the plot
+par(mfrow=c(1,2), mar=c(4,2,1,1))
+# call ``dotchart"
+dotchart(contDF)
+# call ``mosaicplot"
+mosaicplot(contDF,color=T,las=1, main=" ",
+xlab="Treatment",ylab="Heal Status" )
+
+```
 
