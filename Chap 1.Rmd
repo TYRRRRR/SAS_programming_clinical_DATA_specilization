@@ -1,5 +1,5 @@
 ---
-title: "R Notebook"
+title: "Treatment Comparisons in Clinical Trials"
 output: html_notebook
 ---
 
