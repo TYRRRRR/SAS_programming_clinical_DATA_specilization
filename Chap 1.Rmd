@@ -23,16 +23,45 @@ df$diff <- df$DBP5-df$DBP1
 ###Print the head of the df
 head(df)
 ```
-### Perform T-Test on diff
+### Simple Analysis on Diff
 ```{r}
 ### assumption of equal var should be tested
 var.test(diff ~ TRT, df)
-### peform t test
+### perform t test
 t.test(diff ~ TRT, df, var.equal=T)
+### if normality is violated, we use non-parametric method
+wilcox.test(diff ~ TRT,df)
+
 ```
+
+### Bootstrapping Method to evaluate Diff (metric of interest)
 ```{r}
-### assumption of equal var should be tested
-var.test(diff ~ TRT, df)
-### peform t test
-t.test(diff ~ TRT, df, var.equal=T)
+# define a function to calculate the mean difference
+calcDiff <- function(dat,i){
+  return (diff(tapply(df[i,]$diff,df[i,]$TRT,mean)))
+}
+# number of bt
+nboot = 1000
+# call function
+bootMean = boot(df,calcDiff,R=1000)
+plot(bootMean)
 ```
+
+### One-way ANOVA for Time Changes
+```{r}
+anovaDF <- df[,2:7] %>%
+  group_by(TRT) %>%
+  summarise_at(vars(DBP1:DBP5),mean)
+
+anovaDF
+# Turn Wide sheet into long form so that Anova can perform
+dfLong <- df %>% pivot_longer(cols = starts_with("DBP"),
+                              names_to = "time",
+                              names_prefix = "DBP",
+                              values_to = "DBP") %>%
+  arrange(time,Subject)
+
+
+```
+
+
