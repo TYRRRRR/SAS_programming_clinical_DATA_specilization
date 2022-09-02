@@ -1,0 +1,121 @@
+---
+title: "Treatment Comparisons in Clinical Trials"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(tidyverse)
+library(boot)
+library(stats)
+```
+
+### Read in the Data
+
+```{r}
+###Read in the clinical trial data and print the head of the data
+df <- read.table("C:/Users/tong2/Desktop/DBS.txt",header = TRUE)
+
+###Derive a new col called diff
+df$diff <- df$DBP5-df$DBP1
+
+###Print the head of the df
+head(df)
+```
+```{r}
+boxplot(DBP1~TRT,df,xlab="Treadtment",ylab = "DBP at baseline")
+
+SexByTrt <- table(df$TRT,df$Sex)
+
+SexByTrt
+
+prop.test(SexByTrt)
+
+# Fit the main effect model on "Sex" and "Age"
+bm1=lm(DBP1~Sex+Age, df)
+# Show the result
+summary(bm1)
+
+# plot the ``Age" to ``DBP1"
+plot(DBP1~Age,las=1,pch=as.character(Sex), df,
+xlab="Age", ylab="Baseline DBP")
+# add the regression lines using ``abline"
+abline(bm1$coef[1], bm1$coef[3],lwd=2, lty=1)
+abline(bm1$coef[1]+bm1$coef[2], bm1$coef[3],lwd=2, lty=4)
+```
+
+### Ancova of DBP
+```{r}
+# start with full model
+m0 = lm(diff~TRT*Age*Sex, df)
+# stepwise model selection
+m1 = step(m0)
+# interactions are not significant
+anova(m1)
+
+anova(lm(diff~TRT+Age, df))
+```
+### MANCOVA for DBP Change from Baseline
+```{r}
+attach(df)
+# create the changes from baseline
+diff2to1 = DBP2-DBP1
+diff3to1 = DBP3-DBP1
+diff4to1 = DBP4-DBP1
+diff5to1 = DBP5-DBP1
+macov1=manova(cbind(diff2to1,diff3to1,diff4to1,
+diff5to1)~TRT+Age,df)
+
+summary(macov1)
+```
+
+### Logistic Regression
+```{r}
+beta.glm = glm(cbind(Deaths,Total-Deaths)~TRT+Center,
+family=binomial,data=betablocker)
+# print the model fitting
+anova(beta.glm)
+
+```
+
+### Quasi-likelihood
+```{r}
+# fit quasi-likelihood for binomial data
+beta.glm2 = glm(cbind(Deaths,Total- Deaths)~TRT+Center,
+family=quasibinomial,data=betablocker)
+# print the model fit
+summary(beta.glm2)
+
+"
+Data Polyps
+number treat age
+1 63 placebo 20
+2 2 drug 16
+3 28 placebo 18
+4 17 drug 22
+5 61 placebo 13
+6 1 drug 23
+7 7 placebo 34
+8 15 placebo 50
+9 44 placebo 19
+10 25 drug 17
+11 3 drug 23
+12 28 placebo 22
+13 10 placebo 30
+14 40 placebo 27
+15 33 drug 23
+16 46 placebo 22
+17 50 placebo 34
+18 3 drug 23
+19 1 drug 22
+20 4 drug 42
+"
+# Poisson Regression
+m0.polyps = glm(number~treat*age, polyps, family=poisson())
+# print the model fit
+summary(m0.polyps)
+
+```
