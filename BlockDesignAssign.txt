@@ -1,0 +1,15 @@
+data blkdes;
+ call streaminit(29323);
+ do block = 1 to 10;
+  do unit = 1 to 6;
+  rndx = rand('uniform');
+  if unit < 4 then assignment = 'A';
+  			  else assignment = 'B';
+  output;
+  end;
+end;
+run;
+
+proc sort data = blkdes;
+by block rndx;
+run;
