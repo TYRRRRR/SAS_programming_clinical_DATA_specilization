@@ -13,3 +13,10 @@ run;
 proc sort data = blkdes;
 by block rndx;
 run;
+
+
+proc plan seed=12345;
+factors block=50 ordered unit=6 random;
+output out=blkdes2 unit cvals=('A' 'A' 'A' 'B' 'B' 'B')
+random;
+run;
