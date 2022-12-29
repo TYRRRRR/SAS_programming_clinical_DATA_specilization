@@ -1,0 +1,25 @@
+data captopril;
+do treatment='Captopril', 'Placebo';
+input id basebp week1bp @;
+if id~=. then output;
+end;
+datalines;
+1 147 137 1 133 139
+2 129 120 2 129 134
+3 158 141 3 152 136
+4 164 137 4 161 151
+5 134 140 5 154 147
+6 155 144 6 141 137
+7 151 134 7 156 149
+8 141 123 . . .
+9 153 142 . . .
+;
+
+
+proc sort data=captopril;
+by treatment;
+run;
+proc ttest data=captopril;
+paired basebp*week1bp;
+by treatment;
+run;
